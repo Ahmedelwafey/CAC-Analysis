@@ -1,0 +1,40 @@
+import pandas as pd
+import plotly.express as px
+import plotly.io as pio
+import plotly.graph_objects as go
+pio.templates.default = "plotly_white"
+
+#read from dataset
+
+data = pd.read_csv("customer_acquisition_cost_dataset.csv")
+
+#Create CAC 
+
+data['CAC'] = data['Marketing_Spend'] / data['New_Customers']
+
+summary_stats = data.groupby('Marketing_Channel')['CAC'].describe()
+data['Conversion_Rate'] = data['New_Customers'] / data['Marketing_Spend'] * 100
+fig = px.bar(data, x='Marketing_Channel', 
+             y='Conversion_Rate', 
+             title='Conversion Rates by Marketing Channel')
+fig.show()
+
+# Creaet the break even 
+data['Break_Even_Customers'] = data['Marketing_Spend'] / data['CAC']
+
+fig4 = go.Figure()
+
+# Actual Customers Acquired
+fig4.add_trace(go.Bar(x=data['Marketing_Channel'], y=data['New_Customers'],
+                     name='Actual Customers Acquired', marker_color='royalblue'))
+
+# Break-Even Customers
+fig4.add_trace(go.Bar(x=data['Marketing_Channel'], y=data['Break_Even_Customers'],
+                     name='Break-Even Customers', marker_color='lightcoral'))
+
+# Update the layout
+fig4.update_layout(barmode='group', title='Actual vs. Break-Even Customers by Marketing Channel',
+                  xaxis_title='Marketing Channel', yaxis_title='Number of Customers')
+
+# Show the chart
+fig4.show()
